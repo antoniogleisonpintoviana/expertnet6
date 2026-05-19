@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Foto 3x4 Pro - Expert Net</title>
+    <style>
+        /* --- CABEÇALHO EXPERT NET --- */
+        body {
+            font-family: Arial, sans-serif;
+            background: #F8AF31; /* Fundo amarelo da identidade */
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            padding-bottom: 40px;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: #B8B8B8;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 4px solid #0E0E0E;
+            margin-bottom: 30px;
+        }
+
+        .logo-placeholder {
+            width: 90px;
+            height: 75px;
+            position: relative;
+            margin-right: 20px;
+            transform: scale(0.7);
+        }
+        .triangle {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 45px solid transparent;
+            border-right: 45px solid transparent;
+        }
+        .tri-1 { border-bottom: 80px solid #F8AF31; top: 0; left: 10px; opacity: 0.8; }
+        .tri-2 { border-bottom: 80px solid #222; top: 20px; left: 30px; }
+        .tri-3 { border-bottom: 80px solid #F8CE7A; top: 10px; left: -10px; opacity: 0.8; }
+
+        .header-titles {
+            text-align: left;
+        }
+        .header-titles h1 {
+            font-size: 2.2rem;
+            color: #111;
+            font-weight: 900;
+            margin: 0;
+            text-transform: uppercase;
+            line-height: 1;
+        }
+        .header-titles h2 {
+            font-size: 0.9rem;
+            color: #222;
+            font-weight: 600;
+            margin: 3px 0 0 0;
+            letter-spacing: 1px;
+        }
+        /* ----------------------------- */
+
+        .container {
+            background: white;
+            max-width: 600px;
+            margin: auto;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            border: 2px solid #0E0E0E; /* Borda da identidade visual */
+        }
+
+        h2.titulo-ferramenta {
+            color: #0E0E0E;
+            margin-top: 0;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-weight: 900;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 354px;
+            height: 472px;
+            margin: auto;
+            border: 2px solid #0E0E0E;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .crop-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            border: 45px solid rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin: 15px 0;
+        }
+
+        /* Padronizando botões na cor da Expert Net */
+        button {
+            padding: 12px 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            background: #0E0E0E;
+            color: #F8AF31;
+            transition: 0.2s;
+        }
+        button:hover { background: #2A2A2A; }
+        
+        .btn-main {
+            background: #0E0E0E;
+            color: #F8AF31;
+            grid-column: span 4;
+            font-size: 16px;
+            padding: 15px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        /* Botão de Remover Fundo um pouco diferente para destaque */
+        .btn-bg {
+            background: #333 !important;
+            color: #fff;
+            grid-column: span 4;
+            font-size: 14px;
+        }
+        .btn-bg:hover { background: #555 !important; }
+
+        #loading {
+            display: none;
+            color: #0E0E0E;
+            font-weight: bold;
+            padding: 10px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0.5; } }
+        
+        .teclado-info {
+            font-size: 11px;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        #canvas-grade {
+            max-width: 100%;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            background: #fff;
+        }
+
+        input[type="file"] {
+            margin-bottom: 15px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 80%;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-placeholder">
+        <div class="triangle tri-3"></div>
+        <div class="triangle tri-1"></div>
+        <div class="triangle tri-2"></div>
+    </div>
+    <div class="header-titles">
+        <h1>EXPERT NET</h1>
+        <h2>SERVIÇOS DE IMPRESSÃO</h2>
+    </div>
+</header>
+
+<div class="container">
+    <h2 class="titulo-ferramenta">Foto 3x4</h2>
+    <div class="teclado-info"><b>Setas</b>: Mover | <b>+ / -</b>: Zoom</div>
+    
+    <input type="file" id="upload" accept="image/*">
+    <div id="loading">🚀 PROCESSANDO IA... AGUARDE</div>
+
+    <div class="canvas-wrapper">
+        <canvas id="canvas" width="354" height="472"></canvas>
+        <div class="crop-mask"></div>
+    </div>
+
+    <div class="controls">
+        <button onclick="ajustarZoom(1.1)">ZOOM (+)</button>
+        <button onclick="ajustarZoom(0.9)">ZOOM (-)</button>
+        <button onclick="mover(0, -15)">CIMA</button>
+        <button onclick="mover(0, 15)">BAIXO</button>
+        <button onclick="mover(-15, 0)">ESQ.</button>
+        <button onclick="mover(15, 0)">DIR.</button>
+        <button id="btnBg" onclick="removerFundoAPI()" class="btn-bg">REMOVER FUNDO INSTANTÂNEO</button>
+    </div>
+
+    <button onclick="gerarGrade()" class="btn-main">GERAR PREVIEW (6 FOTOS)</button>
+
+    <div id="preview-final" style="display:none; margin-top:20px;">
+        <canvas id="canvas-grade"></canvas>
+        <button onclick="baixarPDF()" class="btn-main" style="margin-top:15px;">BAIXAR PDF PARA IMPRESSÃO</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    let imgInput = new Image();
+    let zoom = 1.0;
+    let posX = 0, posY = 0;
+
+    // Chave de API mantida conforme solicitado
+    const apiKey = "MxDhSaXwo3q29moQmbCTxepz";
+
+    // Funções de movimento e desenho
+    function desenhar() {
+        ctx.fillStyle = "white"; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if(imgInput.src) {
+            ctx.drawImage(imgInput, posX, posY, imgInput.width * zoom, imgInput.height * zoom);
+        }
+    }
+
+    function ajustarZoom(f) { 
+        const oldW = imgInput.width * zoom;
+        const oldH = imgInput.height * zoom;
+        zoom *= f;
+        posX -= (imgInput.width * zoom - oldW) / 2;
+        posY -= (imgInput.height * zoom - oldH) / 2;
+        desenhar(); 
+    }
+
+    function mover(dx, dy) { posX += dx; posY += dy; desenhar(); }
+
+    // Gerencia o carregamento inicial (Novo Arquivo)
+    function configurarPosicaoInicial() {
+        zoom = (canvas.width / imgInput.width) * 1.45; 
+        posX = (canvas.width - (imgInput.width * zoom)) / 2;
+        posY = 100; 
+        desenhar();
+    }
+
+    // Evento de Upload
+    document.getElementById("upload").onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            imgInput.onload = configurarPosicaoInicial; // Define que deve resetar posição
+            imgInput.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // Eventos de Teclado
+    window.addEventListener("keydown", (e) => {
+        if (!imgInput.src) return;
+        switch(e.key) {
+            case "ArrowUp": mover(0, -5); e.preventDefault(); break;
+            case "ArrowDown": mover(0, 5); e.preventDefault(); break;
+            case "ArrowLeft": mover(-5, 0); e.preventDefault(); break;
+            case "ArrowRight": mover(5, 0); e.preventDefault(); break;
+            case "+": case "=": ajustarZoom(1.02); e.preventDefault(); break;
+            case "-": case "_": ajustarZoom(0.98); e.preventDefault(); break;
+        }
+    });
+
+    // Remover Fundo mantendo a posição e usando a API Key direta
+    async function removerFundoAPI() {
+        if (!imgInput.src) return alert("Selecione uma foto!");
+        
+        const loader = document.getElementById("loading");
+        const btn = document.getElementById("btnBg");
+        loader.style.display = "block";
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(imgInput.src);
+            const blob = await res.blob();
+            const formData = new FormData();
+            formData.append("image_file", blob, "foto.png");
+            formData.append("size", "auto");
+
+            const response = await fetch("https://api.remove.bg/v1.0/removebg", {
+                method: "POST",
+                headers: { "X-Api-Key": apiKey },
+                body: formData
+            });
+
+            if (response.ok) {
+                const resultBlob = await response.blob();
+                const novaUrl = URL.createObjectURL(resultBlob);
+                
+                // Mantém a imagem centralizada sem resetar as coordenadas
+                imgInput.onload = () => {
+                    desenhar();
+                    loader.style.display = "none";
+                    btn.disabled = false;
+                };
+                imgInput.src = novaUrl;
+
+            } else {
+                alert("Erro na API ou saldo insuficiente.");
+                loader.style.display = "none";
+                btn.disabled = false;
+            }
+        } catch (e) {
+            alert("Erro de conexão ao tentar remover o fundo.");
+            loader.style.display = "none";
+            btn.disabled = false;
+        }
+    }
+
+    // Grade e PDF
+    function gerarGrade() {
+        const cGrade = document.getElementById("canvas-grade");
+        const ctxG = cGrade.getContext("2d");
+        const fotoW = 354, fotoH = 472, gap = 12;
+        cGrade.width = (fotoW * 6) + (gap * 5) + 40;
+        cGrade.height = fotoH + 40;
+        ctxG.fillStyle = "white";
+        ctxG.fillRect(0, 0, cGrade.width, cGrade.height);
+        for (let i = 0; i < 6; i++) {
+            let x = 20 + i * (fotoW + gap);
+            let y = 20;
+            ctxG.drawImage(canvas, x, y, fotoW, fotoH);
+            ctxG.strokeStyle = "#ddd";
+            ctxG.strokeRect(x, y, fotoW, fotoH);
+        }
+        document.getElementById("preview-final").style.display = "block";
+        document.getElementById("preview-final").scrollIntoView({ behavior: 'smooth' });
+    }
+
+   function baixarPDF() {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: "p", unit: "cm", format: "a4" });
+    const larguraFotoCm = 3, alturaFotoCm = 4, espaco = 0.1, margemSuperior = 0.5;
+    const larguraTotal = (larguraFotoCm * 6) + (espaco * 5);
+    const margemEsquerda = (21 - larguraTotal) / 2;
+    const imgData = canvas.toDataURL("image/jpeg", 1.0);
+
+    for (let i = 0; i < 6; i++) {
+        let pX = margemEsquerda + (i * (larguraFotoCm + espaco));
+
+        // 1. Desenha a foto
+        pdf.addImage(imgData, "JPEG", pX, margemSuperior, larguraFotoCm, alturaFotoCm);
+
+        // 2. Configura a cor da borda (0 = preto) e a espessura da linha
+        pdf.setDrawColor(0); 
+        pdf.setLineWidth(0.01); // Espessura bem fina em cm
+
+        // 3. Desenha o retângulo ao redor da foto (mesmas coordenadas e tamanho)
+        pdf.rect(pX, margemSuperior, larguraFotoCm, alturaFotoCm, 'S');
+    }
+
+    pdf.save("fotos_3x4_impressao.pdf");
+}
+</script>
+</body>
+</html>

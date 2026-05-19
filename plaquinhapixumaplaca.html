@@ -1,0 +1,357 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Placas PIX - Expert Net</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        /* --- CABEÇALHO EXPERT NET --- */
+        body {
+            font-family: Arial, sans-serif;
+            background: #F8AF31; /* Fundo amarelo da identidade */
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            padding-bottom: 40px;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: #B8B8B8;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 4px solid #0E0E0E;
+            margin-bottom: 30px;
+        }
+
+        .logo-placeholder {
+            width: 90px;
+            height: 75px;
+            position: relative;
+            margin-right: 20px;
+            transform: scale(0.7);
+        }
+        .triangle {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 45px solid transparent;
+            border-right: 45px solid transparent;
+        }
+        .tri-1 { border-bottom: 80px solid #F8AF31; top: 0; left: 10px; opacity: 0.8; }
+        .tri-2 { border-bottom: 80px solid #222; top: 20px; left: 30px; }
+        .tri-3 { border-bottom: 80px solid #F8CE7A; top: 10px; left: -10px; opacity: 0.8; }
+
+        .header-titles {
+            text-align: left;
+        }
+        .header-titles h1 {
+            font-size: 2.2rem;
+            color: #111;
+            font-weight: 900;
+            margin: 0;
+            text-transform: uppercase;
+            line-height: 1;
+        }
+        .header-titles h2 {
+            font-size: 0.9rem;
+            color: #222;
+            font-weight: 600;
+            margin: 3px 0 0 0;
+            letter-spacing: 1px;
+        }
+        /* ----------------------------- */
+
+        /* --- CONTROLES E FORMULÁRIOS --- */
+        .controles { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 10px; 
+            max-width: 650px; 
+            margin: 0 auto 30px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            border: 2px solid #0E0E0E; 
+        }
+
+        h2.titulo-ferramenta {
+            color: #0E0E0E;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-weight: 900;
+        }
+
+        textarea { 
+            width: 95%; 
+            height: 100px; 
+            margin: 10px 0; 
+            padding: 12px; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            border: 1px solid #ccc; 
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        input[type="file"] {
+            margin-bottom: 15px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 95%;
+            box-sizing: border-box;
+            background: #fff;
+        }
+
+        button { 
+            padding: 12px 24px; 
+            cursor: pointer; 
+            background: #0E0E0E; 
+            color: #F8AF31; 
+            border: none; 
+            border-radius: 5px; 
+            font-weight: bold; 
+            margin: 5px; 
+            transition: background 0.2s;
+        }
+        
+        button:hover { 
+            background: #2A2A2A; 
+        }
+
+        /* --- ÁREA DE PREVIEW (A4) --- */
+        .preview-container {
+            position: relative;
+            width: 21cm;
+            height: 29.7cm;
+            background: white;
+            margin: 0 auto;
+            border: 2px solid #0E0E0E;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .placa {
+            position: absolute;
+            width: 6.5cm;
+            height: 10.5cm; /* Aumentado levemente para o respiro */
+            background: white;
+            color: black;
+            transition: all 0.3s ease;
+            transform-origin: center center;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .qr-area { 
+            width: 6.5cm; 
+            height: 7cm; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        
+        .qr-area img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain; 
+        }
+
+        .texto-area {
+            width: 6.5cm;
+            height: 3cm;
+            border: 0.6mm solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 5px;
+            margin-top: 5px; /* Respiro entre QR e Texto */
+            box-sizing: border-box;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-placeholder">
+            <div class="triangle tri-3"></div>
+            <div class="triangle tri-1"></div>
+            <div class="triangle tri-2"></div>
+        </div>
+        <div class="header-titles">
+            <h1>EXPERT NET</h1>
+            <h2>SERVIÇOS DE IMPRESSÃO</h2>
+        </div>
+    </header>
+
+    <div class="controles">
+        <h2 class="titulo-ferramenta">Gerador de Placas PIX</h2>
+        <textarea id="textoLivre" placeholder="Digite os dados do PIX aqui..."></textarea>
+        <br>
+        <input type="file" id="uploadQR" accept="image/*">
+        <br><br>
+        <button type="button" onclick="atualizarDados()">1. Atualizar Preview</button>
+        <button type="button" onclick="gerarPDF()">2. Gerar PDF</button>
+    </div>
+
+    <div id="pagina" class="preview-container"></div>
+
+<script>
+    let qrBase64 = "";
+    let angulos = [0, 0, 0, 0];
+    let visivel = [true, true, true, true];
+
+    const MARGEM_TOP = 0.5;
+    const COL1_X = 2.0; 
+    const COL2_X = 10.5;
+
+    function inicializar() {
+        const container = document.getElementById("pagina");
+        container.innerHTML = "";
+        for(let i=0; i<4; i++) {
+            container.innerHTML += `
+                <div id="p${i}" class="placa" onclick="togglePlaca(${i})">
+                    <div class="qr-area"><img id="q${i}"></div>
+                    <div id="t${i}" class="texto-area"></div>
+                </div>`;
+        }
+    }
+    inicializar();
+
+    window.atualizarDados = function() {
+        const textoInput = document.getElementById("textoLivre").value;
+        for(let i=0; i<4; i++) {
+            document.getElementById("t"+i).innerText = textoInput || "Dados do PIX";
+            if(qrBase64) document.getElementById("q"+i).src = qrBase64;
+        }
+        recalcularLayout();
+    };
+
+    window.togglePlaca = function(i) {
+        visivel[i] = !visivel[i];
+        recalcularLayout();
+    };
+
+    window.recalcularLayout = function() {
+        for(let i=0; i<4; i++) {
+            const el = document.getElementById("p"+i);
+            if(!el) continue;
+            el.style.display = visivel[i] ? "block" : "none";
+            
+            const girado = (angulos[i] / 90) % 2 !== 0;
+            const x = (i % 2 === 0) ? COL1_X : COL2_X;
+            let y;
+
+            if (i < 2) {
+                y = MARGEM_TOP;
+                if(girado) y += 1.75; 
+            } else {
+                const cimaGirado = (angulos[i-2] / 90) % 2 !== 0;
+                const hCima = cimaGirado ? 6.5 : 10.5;
+                y = MARGEM_TOP + hCima + 0.4;
+                if(girado) y += 1.75;
+            }
+
+            el.style.transform = `rotate(${angulos[i]}deg)`;
+            el.style.top = y + "cm";
+            el.style.left = x + "cm";
+        }
+    };
+
+    document.getElementById("uploadQR").onchange = function(e) {
+        const reader = new FileReader();
+        reader.onload = (evt) => { 
+            qrBase64 = evt.target.result;
+            window.atualizarDados();
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    };
+
+    document.onkeydown = (e) => {
+        let key = parseInt(e.key);
+        if (key >= 1 && key <= 4) {
+            angulos[key-1] = (angulos[key-1] + 90) % 360;
+            window.recalcularLayout();
+        }
+    };
+
+    window.gerarPDF = async function() {
+        if(!qrBase64) { alert("Selecione o QR Code!"); return; }
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ unit: "cm", format: "a4" });
+
+        for (let i = 0; i < 4; i++) {
+            if (!visivel[i]) continue;
+            const placaImg = await capturarComoImagem(i);
+            const girado = (angulos[i] / 90) % 2 !== 0;
+            const x = (i % 2 === 0) ? COL1_X : COL2_X;
+            let y;
+
+            if (i < 2) y = MARGEM_TOP;
+            else {
+                const acimaGirado = (angulos[i-2] / 90) % 2 !== 0;
+                y = MARGEM_TOP + (acimaGirado ? 6.5 : 10.5) + 0.4;
+            }
+
+            pdf.addImage(placaImg, "JPEG", x, y, girado ? 10.5 : 6.5, girado ? 6.5 : 10.5);
+        }
+        pdf.save("placas_pix_final.pdf");
+    };
+
+    async function capturarComoImagem(index) {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const ang = angulos[index];
+        const girado = (ang / 90) % 2 !== 0;
+        
+        const scale = 4; // Qualidade
+        const w = 6.5 * 37.8 * scale;
+        const h = 10.5 * 37.8 * scale;
+
+        canvas.width = girado ? h : w;
+        canvas.height = girado ? w : h;
+
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.translate(canvas.width/2, canvas.height/2);
+        ctx.rotate(ang * Math.PI / 180);
+
+        const imgEl = document.getElementById("q"+index);
+        if(imgEl && imgEl.src) {
+            // Desenha o QR ocupando os 7cm iniciais (escala proporcional)
+            ctx.drawImage(imgEl, -w/2, -h/2, w, (7 * 37.8 * scale));
+        }
+
+        // Borda do texto com a mesma largura do QR (6.5cm)
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2 * scale;
+        // Posicionado a 7.2cm do topo (respiro de 0.2cm do QR)
+        const yTexto = (-h/2) + (7.2 * 37.8 * scale);
+        const hCaixaTexto = (3 * 37.8 * scale);
+        
+        ctx.strokeRect(-w/2, yTexto, w, hCaixaTexto);
+
+        // Texto interno
+        ctx.fillStyle = "black";
+        ctx.font = `bold ${13 * scale}px Arial`;
+        ctx.textAlign = "center";
+        const linhas = document.getElementById("textoLivre").value.split('\n');
+        linhas.forEach((l, idx) => {
+            // Centraliza verticalmente dentro da caixa de texto
+            ctx.fillText(l, 0, yTexto + (hCaixaTexto/2) - (linhas.length * 10) + (idx * 18 * scale));
+        });
+
+        return canvas.toDataURL("image/jpeg", 0.9);
+    }
+</script>
+</body>
+</html>
+
+```

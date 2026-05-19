@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expert Net - Serviços de Impressão</title>
+    <style>
+        /* Reset básico e fontes */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #F8AF31; /* Fundo amarelo/laranja principal */
+        }
+
+        /* --- CABEÇALHO (Área Cinza) --- */
+        header {
+            background-color: #B8B8B8;
+            padding: 30px 50px;
+            display: flex;
+            align-items: center;
+            border-bottom: 4px solid #F8AF31;
+        }
+
+        /* Representação do Logo em CSS (Substitua por sua imagem/SVG do Corel) */
+        .logo-placeholder {
+            width: 120px;
+            height: 100px;
+            position: relative;
+            margin-right: 30px;
+        }
+        
+        .triangle {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 45px solid transparent;
+            border-right: 45px solid transparent;
+        }
+        .tri-1 {
+            border-bottom: 80px solid #F8AF31;
+            top: 0; left: 10px;
+            opacity: 0.8;
+        }
+        .tri-2 {
+            border-bottom: 80px solid #222;
+            top: 20px; left: 30px;
+        }
+        .tri-3 {
+            border-bottom: 80px solid #F8CE7A;
+            top: 10px; left: -10px;
+            opacity: 0.8;
+        }
+
+        /* Títulos do Cabeçalho */
+        .header-titles h1 {
+            font-size: 3.5rem;
+            color: #111;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .header-titles h2 {
+            font-size: 1.2rem;
+            color: #222;
+            font-weight: 600;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+
+        /* --- CONTEÚDO PRINCIPAL E LINKS --- */
+        main {
+            flex: 1;
+            display: flex;
+            padding-top: 5px;
+        }
+
+        .links-container {
+            display: flex;
+            flex-direction: column;
+            width: 45%; /* Largura da área das faixas */
+            max-width: 500px;
+        }
+
+        /* Estilo das Faixas Pretas */
+        .ribbon-link {
+            background-color: #0E0E0E;
+            color: #FFFFFF;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 30px 20px;
+            margin-bottom: 4px; /* O espaço que cria a linha amarela entre eles */
+            
+            /* Aqui está o truque para o corte em "seta" na direita */
+            clip-path: polygon(0% 0%, 100% 0%, 85% 50%, 100% 100%, 0% 100%);
+            
+            transition: background-color 0.2s ease, padding-left 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Efeito ao passar o mouse para dar agilidade visual */
+        .ribbon-link:hover {
+            background-color: #2A2A2A;
+            padding-left: 30px; 
+            color: #F8AF31;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-placeholder">
+            <div class="triangle tri-3"></div>
+            <div class="triangle tri-1"></div>
+            <div class="triangle tri-2"></div>
+        </div>
+        
+        <div class="header-titles">
+            <h1>EXPERT NET</h1>
+            <h2>SERVIÇOS DE IMPRESSÃO</h2>
+        </div>
+    </header>
+
+    <main>
+        <nav class="links-container">
+            <a href="imagemPersonalizadaMeiafolha.html" class="ribbon-link">CONVITES VIRTUAIS E IMPRESSOS</a>
+            <a href="fotos3por4beta.html" class="ribbon-link">FOTOS 3X4</a>
+            <a href="plaquinhapixumaplaca.html" class="ribbon-link">PLAQUINAS DE PIX</a>
+            <a href="#" class="ribbon-link">CRIAÇÃO DE ARTE E LOGO TIPO</a>
+        </nav>
+    </main>
+
+</body>
+</html>

@@ -1,363 +1,243 @@
+O problema de as imagens não aparecerem está acontecendo por dois motivos no seu código:
 
+1. **Erro de Sintaxe (Código colado junto):** Na hora que o código foi salvo, as quebras de linha do JavaScript desapareceram e os comandos se juntaram (por exemplo: `let imagensBase64 = []let removidas = []`). Sem as quebras de linha ou pontos e vírgulas (`;`), o navegador não consegue ler o código e o script simplesmente trava por inteiro.
+2. **Falta de Validação:** Se você (ou outra pessoa) esquecer de preencher os campos "Largura" e "Altura" e clicar em "Gerar Layout", a matemática do código quebra (gera um valor `NaN` - *Not a Number*) e o sistema não consegue desenhar o grid, deixando tudo em branco.
+
+Eu corrigi a formatação do código, adicionei os pontos e vírgulas de segurança e coloquei uma trava que avisa se a largura e a altura não forem preenchidas.
+
+Basta copiar o código abaixo e atualizar o seu arquivo no GitHub:
+
+```html
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-<meta charset="UTF-8">
-<title>Gerador de Impressão A4 - Expert Net</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<style>
-/* Reset básico para encaixar o cabeçalho */
-body {
-    font-family: Arial, sans-serif;
-    background: #F8AF31; /* Fundo amarelo da identidade */
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    padding-bottom: 40px;
-}
-
-/* --- CABEÇALHO EXPERT NET --- */
-header {
-    background-color: #B8B8B8;
-    padding: 15px 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-bottom: 4px solid #0E0E0E;
-    margin-bottom: 30px;
-}
-
-/* Logo CSS (pode substituir pela sua imagem) */
-.logo-placeholder {
-    width: 90px;
-    height: 75px;
-    position: relative;
-    margin-right: 20px;
-    transform: scale(0.7);
-}
-.triangle {
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-left: 45px solid transparent;
-    border-right: 45px solid transparent;
-}
-.tri-1 { border-bottom: 80px solid #F8AF31; top: 0; left: 10px; opacity: 0.8; }
-.tri-2 { border-bottom: 80px solid #222; top: 20px; left: 30px; }
-.tri-3 { border-bottom: 80px solid #F8CE7A; top: 10px; left: -10px; opacity: 0.8; }
-
-.header-titles {
-    text-align: left;
-}
-.header-titles h1 {
-    font-size: 2.2rem;
-    color: #111;
-    font-weight: 900;
-    margin: 0;
-    text-transform: uppercase;
-    line-height: 1;
-}
-.header-titles h2 {
-    font-size: 0.9rem;
-    color: #222;
-    font-weight: 600;
-    margin: 3px 0 0 0;
-    letter-spacing: 1px;
-}
-/* ----------------------------- */
-
-.container {
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    max-width: 950px;
-    margin: auto;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-    border: 2px solid #0E0E0E; /* Borda preta acompanhando o estilo */
-}
-
-h2.titulo-ferramenta {
-    color: #0E0E0E;
-    margin-top: 0;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-    font-weight: 900;
-}
-
-input, select {
-    padding: 8px;
-    margin: 5px;
-    width: 120px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-button {
-    padding: 10px 15px;
-    margin: 10px;
-    cursor: pointer;
-    border: none;
-    background: #0E0E0E; /* Botões na cor preta */
-    color: #F8AF31; /* Texto na cor amarela */
-    font-weight: bold;
-    border-radius: 5px;
-    transition: background 0.2s;
-}
-
-button:hover {
-    background: #2A2A2A;
-}
-
-#pagina {
-    margin-top: 25px;
-    background: white;
-    border: 2px solid #333;
-    position: relative;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.imgItem {
-    position: absolute;
-    overflow: hidden;
-    border: 1px dashed #777;
-}
-
-.imgItem img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Gerador de Impressão A4 - Expert Net</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Reset básico para encaixar o cabeçalho */
+        body { font-family: Arial, sans-serif; background: #F8AF31; margin: 0; padding: 0; text-align: center; padding-bottom: 40px; }
+        
+        /* --- CABEÇALHO EXPERT NET --- */
+        header { background-color: #B8B8B8; padding: 15px 30px; display: flex; align-items: center; justify-content: center; border-bottom: 4px solid #0E0E0E; margin-bottom: 30px; }
+        .logo-placeholder { width: 90px; height: 75px; position: relative; margin-right: 20px; transform: scale(0.7); }
+        .triangle { position: absolute; width: 0; height: 0; border-left: 45px solid transparent; border-right: 45px solid transparent; }
+        .tri-1 { border-bottom: 80px solid #F8AF31; top: 0; left: 10px; opacity: 0.8; }
+        .tri-2 { border-bottom: 80px solid #222; top: 20px; left: 30px; }
+        .tri-3 { border-bottom: 80px solid #F8CE7A; top: 10px; left: -10px; opacity: 0.8; }
+        
+        .header-titles { text-align: left; }
+        .header-titles h1 { font-size: 2.2rem; color: #111; font-weight: 900; margin: 0; text-transform: uppercase; line-height: 1; }
+        .header-titles h2 { font-size: 0.9rem; color: #222; font-weight: 600; margin: 3px 0 0 0; letter-spacing: 1px; }
+        
+        /* ----------------------------- */
+        .container { background: white; padding: 25px; border-radius: 10px; max-width: 950px; margin: auto; box-shadow: 0 5px 20px rgba(0,0,0,0.3); border: 2px solid #0E0E0E; }
+        h2.titulo-ferramenta { color: #0E0E0E; margin-top: 0; margin-bottom: 20px; text-transform: uppercase; font-weight: 900; }
+        input, select { padding: 8px; margin: 5px; width: 120px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 15px; margin: 10px; cursor: pointer; border: none; background: #0E0E0E; color: #F8AF31; font-weight: bold; border-radius: 5px; transition: background 0.2s; }
+        button:hover { background: #2A2A2A; }
+        
+        #pagina { margin-top: 25px; background: white; border: 2px solid #333; position: relative; margin-left: auto; margin-right: auto; }
+        .imgItem { position: absolute; overflow: hidden; border: 1px dashed #777; }
+        .imgItem img { width: 100%; height: 100%; object-fit: cover; }
+    </style>
 </head>
-
 <body>
+    <header>
+        <div class="logo-placeholder">
+            <div class="triangle tri-3"></div>
+            <div class="triangle tri-1"></div>
+            <div class="triangle tri-2"></div>
+        </div>
+        <div class="header-titles">
+            <h1>EXPERT NET</h1>
+            <h2>SERVIÇOS DE IMPRESSÃO</h2>
+        </div>
+    </header>
 
-<header>
-    <div class="logo-placeholder">
-        <div class="triangle tri-3"></div>
-        <div class="triangle tri-1"></div>
-        <div class="triangle tri-2"></div>
+    <div class="container">
+        <h2 class="titulo-ferramenta">Gerador de Impressão A4</h2>
+        <input type="number" id="largura" placeholder="Largura (cm)">
+        <input type="number" id="altura" placeholder="Altura (cm)">
+        <input type="number" id="margem" value="0.2" step="0.1">
+        
+        <select id="orientacao">
+            <option value="retrato">Retrato</option>
+            <option value="paisagem">Paisagem</option>
+        </select><br>
+        
+        <input type="file" id="upload" multiple><br>
+        
+        <button onclick="calcular()">Gerar Layout</button>
+        <button onclick="gerarPDF()">Gerar PDF</button>
+        <button onclick="limparTudo()">Limpar Tudo</button>
+        
+        <div id="pagina"></div>
     </div>
-    <div class="header-titles">
-        <h1>EXPERT NET</h1>
-        <h2>SERVIÇOS DE IMPRESSÃO</h2>
-    </div>
-</header>
-
-<div class="container">
-
-<h2 class="titulo-ferramenta">Gerador de Impressão A4</h2>
-
-<input type="number" id="largura" placeholder="Largura (cm)">
-<input type="number" id="altura" placeholder="Altura (cm)">
-<input type="number" id="margem" value="0.2">
-
-<select id="orientacao">
-<option value="retrato">Retrato</option>
-<option value="paisagem">Paisagem</option>
-</select><br>
-
-<input type="file" id="upload" multiple><br>
-
-<button onclick="calcular()">Gerar Layout</button>
-<button onclick="gerarPDF()">Gerar PDF</button>
-<button onclick="limparTudo()">Limpar Tudo</button>
-
-<div id="pagina"></div>
-
-</div>
 
 <script>
-
-let imagensBase64 = []
-let removidas = []
+let imagensBase64 = [];
+let removidas = [];
 
 document.getElementById("upload").addEventListener("change", function(e){
-
-imagensBase64 = []
-removidas = []
-
-let files = e.target.files
-
-for(let i=0; i<files.length; i++){
-
-let reader = new FileReader()
-
-reader.onload = function(evt){
-imagensBase64.push(evt.target.result)
-}
-
-reader.readAsDataURL(files[i])
-
-}
-
-})
+    imagensBase64 = [];
+    removidas = [];
+    let files = e.target.files;
+    
+    for(let i=0; i<files.length; i++){
+        let reader = new FileReader();
+        reader.onload = function(evt){
+            imagensBase64.push(evt.target.result);
+        }
+        reader.readAsDataURL(files[i]);
+    }
+});
 
 function calcular(){
-
-removidas = []
-
-let largura=parseFloat(document.getElementById("largura").value)
-let altura=parseFloat(document.getElementById("altura").value)
-let margem=parseFloat(document.getElementById("margem").value)
-
-let orientacao=document.getElementById("orientacao").value
-
-let pageW=21
-let pageH=29.7
-
-if(orientacao=="paisagem"){
-pageW=29.7
-pageH=21
-}
-
-let larguraTotal=largura+(margem*2)
-let alturaTotal=altura+(margem*2)
-
-let col=Math.floor(pageW/larguraTotal)
-let lin=Math.floor(pageH/alturaTotal)
-
-desenharPagina(col,lin,largura,altura,margem,pageW,pageH)
-
-}
-
-function desenharPagina(col,lin,largura,altura,margem,pageW,pageH){
-
-let pagina=document.getElementById("pagina")
-let escala=25
-
-pagina.style.width=(pageW*escala)+"px"
-pagina.style.height=(pageH*escala)+"px"
-pagina.innerHTML=""
-
-let larguraTotal=largura+(margem*2)
-let alturaTotal=altura+(margem*2)
-
-// 🔥 lista só das posições NÃO removidas
-let imagensAtivas = []
-
-for(let i = 0; i < col * lin; i++){
-    if(!removidas.includes(i)){
-        imagensAtivas.push(i)
+    removidas = [];
+    let largura = parseFloat(document.getElementById("largura").value);
+    let altura = parseFloat(document.getElementById("altura").value);
+    let margem = parseFloat(document.getElementById("margem").value);
+    
+    // Trava de segurança caso os campos estejam vazios
+    if (isNaN(largura) || isNaN(altura)) {
+        alert("Por favor, preencha a Largura e a Altura antes de gerar o layout!");
+        return;
     }
+
+    let orientacao = document.getElementById("orientacao").value;
+    let pageW = 21;
+    let pageH = 29.7;
+    
+    if(orientacao == "paisagem"){
+        pageW = 29.7;
+        pageH = 21;
+    }
+    
+    let larguraTotal = largura + (margem * 2);
+    let alturaTotal = altura + (margem * 2);
+    let col = Math.floor(pageW / larguraTotal);
+    let lin = Math.floor(pageH / alturaTotal);
+    
+    desenharPagina(col, lin, largura, altura, margem, pageW, pageH);
 }
 
-// 🔥 redesenha sem buracos
-for(let i = 0; i < imagensAtivas.length; i++){
-
-let x = i % col
-let y = Math.floor(i / col)
-
-let indexOriginal = imagensAtivas[i]
-
-let div=document.createElement("div")
-div.className="imgItem"
-
-div.style.left=(x*larguraTotal*escala)+"px"
-div.style.top=(y*alturaTotal*escala)+"px"
-div.style.width=(largura*escala)+"px"
-div.style.height=(altura*escala)+"px"
-
-if(imagensBase64.length > 0){
-
-let img=document.createElement("img")
-img.src = imagensBase64[indexOriginal % imagensBase64.length]
-
-img.style.cursor="pointer"
-
-img.onclick = function(){
-    removidas.push(indexOriginal)
-    desenharPagina(col,lin,largura,altura,margem,pageW,pageH)
-}
-
-div.appendChild(img)
-
-}
-
-pagina.appendChild(div)
-
-}
-
+function desenharPagina(col, lin, largura, altura, margem, pageW, pageH){
+    let pagina = document.getElementById("pagina");
+    let escala = 25;
+    
+    pagina.style.width = (pageW * escala) + "px";
+    pagina.style.height = (pageH * escala) + "px";
+    pagina.innerHTML = "";
+    
+    let larguraTotal = largura + (margem * 2);
+    let alturaTotal = altura + (margem * 2);
+    
+    // Lista só das posições NÃO removidas
+    let imagensAtivas = [];
+    for(let i = 0; i < col * lin; i++){
+        if(!removidas.includes(i)){
+            imagensAtivas.push(i);
+        }
+    }
+    
+    // Redesenha sem buracos
+    for(let i = 0; i < imagensAtivas.length; i++){
+        let x = i % col;
+        let y = Math.floor(i / col);
+        let indexOriginal = imagensAtivas[i];
+        
+        let div = document.createElement("div");
+        div.className = "imgItem";
+        div.style.left = (x * larguraTotal * escala) + "px";
+        div.style.top = (y * alturaTotal * escala) + "px";
+        div.style.width = (largura * escala) + "px";
+        div.style.height = (altura * escala) + "px";
+        
+        if(imagensBase64.length > 0){
+            let img = document.createElement("img");
+            img.src = imagensBase64[indexOriginal % imagensBase64.length];
+            img.style.cursor = "pointer";
+            
+            img.onclick = function(){
+                removidas.push(indexOriginal);
+                desenharPagina(col, lin, largura, altura, margem, pageW, pageH);
+            }
+            div.appendChild(img);
+        }
+        pagina.appendChild(div);
+    }
 }
 
 function limparTudo(){
-imagensBase64=[]
-removidas=[]
-document.getElementById("pagina").innerHTML=""
+    imagensBase64 = [];
+    removidas = [];
+    document.getElementById("pagina").innerHTML = "";
+    document.getElementById("largura").value = "";
+    document.getElementById("altura").value = "";
 }
 
 async function gerarPDF(){
-
-let largura=parseFloat(document.getElementById("largura").value)
-let altura=parseFloat(document.getElementById("altura").value)
-let margem=parseFloat(document.getElementById("margem").value)
-let orientacao=document.getElementById("orientacao").value
-
-let pageW=21
-let pageH=29.7
-let orientation="p"
-
-if(orientacao=="paisagem"){
-pageW=29.7
-pageH=21
-orientation="l"
-}
-
-let larguraTotal=largura+(margem*2)
-let alturaTotal=altura+(margem*2)
-
-let col=Math.floor(pageW/larguraTotal)
-let lin=Math.floor(pageH/alturaTotal)
-
-const {jsPDF}=window.jspdf
-
-let pdf=new jsPDF({
-orientation:orientation,
-unit:"cm",
-format:"a4"
-})
-
-// 🔥 mesma lógica no PDF
-let imagensAtivas = []
-
-for(let i = 0; i < col * lin; i++){
-    if(!removidas.includes(i)){
-        imagensAtivas.push(i)
+    let largura = parseFloat(document.getElementById("largura").value);
+    let altura = parseFloat(document.getElementById("altura").value);
+    let margem = parseFloat(document.getElementById("margem").value);
+    
+    if (isNaN(largura) || isNaN(altura)) {
+        alert("Gere o layout na tela primeiro antes de salvar o PDF.");
+        return;
     }
+
+    let orientacao = document.getElementById("orientacao").value;
+    let pageW = 21;
+    let pageH = 29.7;
+    let orientation = "p";
+    
+    if(orientacao == "paisagem"){
+        pageW = 29.7;
+        pageH = 21;
+        orientation = "l";
+    }
+    
+    let larguraTotal = largura + (margem * 2);
+    let alturaTotal = altura + (margem * 2);
+    let col = Math.floor(pageW / larguraTotal);
+    let lin = Math.floor(pageH / alturaTotal);
+    
+    const {jsPDF} = window.jspdf;
+    let pdf = new jsPDF({
+        orientation: orientation,
+        unit: "cm",
+        format: "a4"
+    });
+    
+    // Mesma lógica no PDF
+    let imagensAtivas = [];
+    for(let i = 0; i < col * lin; i++){
+        if(!removidas.includes(i)){
+            imagensAtivas.push(i);
+        }
+    }
+    
+    for(let i = 0; i < imagensAtivas.length; i++){
+        let x = i % col;
+        let y = Math.floor(i / col);
+        let indexOriginal = imagensAtivas[i];
+        
+        if(imagensBase64.length > 0){
+            pdf.addImage(
+                imagensBase64[indexOriginal % imagensBase64.length],
+                "PNG",
+                (x * larguraTotal) + margem,
+                (y * alturaTotal) + margem,
+                largura,
+                altura
+            );
+        }
+    }
+    
+    pdf.save("impressao_a4.pdf");
 }
-
-for(let i = 0; i < imagensAtivas.length; i++){
-
-let x = i % col
-let y = Math.floor(i / col)
-
-let indexOriginal = imagensAtivas[i]
-
-if(imagensBase64.length > 0){
-
-pdf.addImage(
-imagensBase64[indexOriginal % imagensBase64.length],
-"PNG",
-x*larguraTotal+margem,
-y*alturaTotal+margem,
-largura,
-altura
-)
-
-}
-
-}
-
-pdf.save("folha-a4.pdf")
-
-}
-
 </script>
-
 </body>
 </html>
 

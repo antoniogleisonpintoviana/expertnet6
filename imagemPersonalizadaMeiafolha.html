@@ -1,13 +1,4 @@
-O problema de as imagens não aparecerem está acontecendo por dois motivos no seu código:
 
-1. **Erro de Sintaxe (Código colado junto):** Na hora que o código foi salvo, as quebras de linha do JavaScript desapareceram e os comandos se juntaram (por exemplo: `let imagensBase64 = []let removidas = []`). Sem as quebras de linha ou pontos e vírgulas (`;`), o navegador não consegue ler o código e o script simplesmente trava por inteiro.
-2. **Falta de Validação:** Se você (ou outra pessoa) esquecer de preencher os campos "Largura" e "Altura" e clicar em "Gerar Layout", a matemática do código quebra (gera um valor `NaN` - *Not a Number*) e o sistema não consegue desenhar o grid, deixando tudo em branco.
-
-Eu corrigi a formatação do código, adicionei os pontos e vírgulas de segurança e coloquei uma trava que avisa se a largura e a altura não forem preenchidas.
-
-Basta copiar o código abaixo e atualizar o seu arquivo no GitHub:
-
-```html
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>

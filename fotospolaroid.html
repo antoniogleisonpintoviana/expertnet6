@@ -1,0 +1,288 @@
+Prontinho! Removi as bordas das polaroids.
+
+No código anterior, eu tinha colocado uma linha de contorno em volta de cada foto para ajudar na hora do corte, mas se você já tem a manha na guilhotina ou prefere sem linha, é melhor mesmo tirar para o acabamento ficar 100% limpo na impressão.
+
+Fiz a alteração tanto no visual do site (removi a borda da tela) quanto no gerador do PDF (agora ele vai desenhar apenas o fundo branco da polaroid, sem nenhuma linha em volta).
+
+Aqui está o código atualizado:
+
+```html
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Expert Net - Criador de Polaroids</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Reset básico e fontes da Index */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #F8AF31; 
+            color: #000000;
+        }
+
+        /* --- CABEÇALHO IGUAL AO INDEX --- */
+        header {
+            background-color: #B8B8B8;
+            padding: 30px 50px;
+            display: flex;
+            align-items: center;
+            border-bottom: 4px solid #F8AF31;
+            margin-bottom: 20px;
+        }
+
+        .logo-placeholder {
+            width: 120px;
+            height: 100px;
+            position: relative;
+            margin-right: 30px;
+        }
+        
+        .triangle {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 45px solid transparent;
+            border-right: 45px solid transparent;
+        }
+        .tri-1 {
+            border-bottom: 80px solid #F8AF31;
+            top: 0; left: 10px;
+            opacity: 0.8;
+        }
+        .tri-2 {
+            border-bottom: 80px solid #222;
+            top: 20px; left: 30px;
+        }
+        .tri-3 {
+            border-bottom: 80px solid #F8CE7A;
+            top: 10px; left: -10px;
+            opacity: 0.8;
+        }
+
+        .header-titles h1 {
+            font-size: 3.5rem;
+            color: #111;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .header-titles h2 {
+            font-size: 1.2rem;
+            color: #222;
+            font-weight: 600;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+        /* --- FIM DO CABEÇALHO --- */
+
+        .container {
+            max-width: 22cm;
+            margin: 0 auto;
+            padding: 0 20px 40px 20px;
+        }
+
+        .controles { 
+            margin-bottom: 15px; 
+            background: #0E0E0E; 
+            color: #FFFFFF; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .controles h2 {
+            margin-bottom: 15px;
+            color: #F8AF31;
+        }
+
+        .controles button {
+            background-color: #F8AF31;
+            color: #0E0E0E;
+            border: none;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        .controles button:hover {
+            background-color: #F8CE7A;
+        }
+
+        /* Simulação da folha A4 no navegador */
+        .preview-container {
+            position: relative;
+            width: 21cm;
+            height: 29.7cm;
+            border: 2px solid #000;
+            background-color: #f1f1f1; 
+            margin: 0 auto;
+            overflow: hidden;
+            box-shadow: 0px 10px 20px rgba(0,0,0,0.5); 
+        }
+
+        /* Estrutura visual da Polaroid na tela (sem bordas agora) */
+        .polaroid-frame {
+            width: 6cm;
+            height: 8cm;
+            background-color: #ffffff;
+            position: absolute;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1); /* Mantive só uma sombrinha pra você conseguir enxergar na tela */
+            
+            /* Margens internas: 0.5cm topo/lados, 1cm inferior */
+            padding: 0.5cm 0.5cm 1cm 0.5cm; 
+            box-sizing: border-box;
+        }
+
+        .polaroid-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-placeholder">
+            <div class="triangle tri-3"></div>
+            <div class="triangle tri-1"></div>
+            <div class="triangle tri-2"></div>
+        </div>
+        
+        <div class="header-titles">
+            <h1>EXPERT NET</h1>
+            <h2>SERVIÇOS DE IMPRESSÃO</h2>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="controles">
+            <h2>Gerador de Polaroids (6x8) - 9 por folha</h2>
+            <input type="file" id="inputFile" accept="image/*" multiple>
+            <br>
+            <button onclick="mostrarImagem()">Carregar Fotos</button>
+            <button onclick="gerarPDF()">Gerar PDF para Impressão</button>
+            <p style="margin-top: 10px;"><small>Selecione até 9 fotos. O sistema ajustará o corte automaticamente.</small></p>
+        </div>
+
+        <div class="preview-container" id="folhaA4">
+            </div>
+    </div>
+
+<script>
+    // Posições exatas na folha A4 (em cm)
+    const posicoes = [
+        { x: 1.0, y: 2.0 },  { x: 7.5, y: 2.0 },  { x: 14.0, y: 2.0 },
+        { x: 1.0, y: 11.0 }, { x: 7.5, y: 11.0 }, { x: 14.0, y: 11.0 },
+        { x: 1.0, y: 20.0 }, { x: 7.5, y: 20.0 }, { x: 14.0, y: 20.0 }
+    ];
+
+    window.onload = () => {
+        const folha = document.getElementById('folhaA4');
+        posicoes.forEach((pos, index) => {
+            const frame = document.createElement('div');
+            frame.className = 'polaroid-frame';
+            frame.style.left = pos.x + 'cm';
+            frame.style.top = pos.y + 'cm';
+            
+            const img = document.createElement('img');
+            img.id = 'img' + index;
+            img.className = 'polaroid-img';
+            
+            frame.appendChild(img);
+            folha.appendChild(frame);
+        });
+    };
+
+    function mostrarImagem() {
+        const input = document.getElementById("inputFile");
+        const files = input.files;
+        for (let i = 0; i < posicoes.length; i++) {
+            const imgElement = document.getElementById("img" + i);
+            if (files[i]) {
+                imgElement.src = URL.createObjectURL(files[i]);
+            } else {
+                imgElement.src = ""; 
+            }
+        }
+    }
+
+    function canvasProcessCrop(img) {
+        return new Promise((resolve) => {
+            if (!img.src || img.src.includes('undefined') || img.src === window.location.href) return resolve(null);
+            
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            const targetW = 500;
+            const targetH = 650;
+            canvas.width = targetW;
+            canvas.height = targetH;
+
+            const imgRatio = img.naturalWidth / img.naturalHeight;
+            const targetRatio = targetW / targetH;
+
+            let drawW, drawH, drawX, drawY;
+
+            if (imgRatio > targetRatio) {
+                drawH = targetH;
+                drawW = img.naturalWidth * (targetH / img.naturalHeight);
+                drawX = (targetW - drawW) / 2; 
+                drawY = 0;
+            } else {
+                drawW = targetW;
+                drawH = img.naturalHeight * (targetW / img.naturalWidth);
+                drawX = 0;
+                drawY = (targetH - drawH) / 2; 
+            }
+
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, targetW, targetH);
+            ctx.drawImage(img, drawX, drawY, drawW, drawH);
+            
+            resolve(canvas.toDataURL("image/jpeg", 0.9));
+        });
+    }
+
+    async function gerarPDF() {
+        const { jsPDF } = window.jspdf;
+        let pdf = new jsPDF({ unit: "cm", format: "a4" });
+
+        for (let i = 0; i < posicoes.length; i++) {
+            const imgElement = document.getElementById("img" + i);
+            const base64 = await canvasProcessCrop(imgElement);
+            
+            if (base64) {
+                const pos = posicoes[i];
+
+                // Desenha apenas o preenchimento branco da Polaroid (usando 'F' em vez de 'FD')
+                pdf.setFillColor(255, 255, 255);
+                pdf.rect(pos.x, pos.y, 6, 8, 'F'); 
+
+                // Desenha a foto por cima
+                pdf.addImage(base64, "JPEG", pos.x + 0.5, pos.y + 0.5, 5, 6.5);
+            }
+        }
+        
+        pdf.save("impressao_polaroids_6x8.pdf");
+    }
+</script>
+</body>
+</html>
+
+```

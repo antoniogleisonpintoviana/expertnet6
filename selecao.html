@@ -1,0 +1,71 @@
+l<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Expert Net - Escolha o Formato</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+
+        body { background-color: #F8AF31; min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* --- CABEÇALHO IDÊNTICO AO INDEX --- */
+        header { background-color: #B8B8B8; padding: 30px 50px; display: flex; align-items: center; border-bottom: 4px solid #F8AF31; }
+
+        .logo-placeholder { width: 120px; height: 100px; position: relative; margin-right: 30px; }
+        .triangle { position: absolute; width: 0; height: 0; border-left: 45px solid transparent; border-right: 45px solid transparent; }
+        .tri-1 { border-bottom: 80px solid #F8AF31; top: 0; left: 10px; opacity: 0.8; }
+        .tri-2 { border-bottom: 80px solid #222; top: 20px; left: 30px; }
+        .tri-3 { border-bottom: 80px solid #F8CE7A; top: 10px; left: -10px; opacity: 0.8; }
+
+        .header-titles h1 { font-size: 3.5rem; color: #111; font-weight: 900; text-transform: uppercase; }
+        .header-titles h2 { font-size: 1.2rem; color: #222; font-weight: 600; margin-top: 5px; }
+
+        /* --- ESTILO DOS LINKS (Fitas/Ribbons da Index) --- */
+        .container { max-width: 800px; margin: 50px auto; padding: 20px; }
+        
+        h2 { color: #0E0E0E; margin-bottom: 30px; text-align: center; font-size: 2rem; }
+
+        .ribbon-link {
+            display: block;
+            background-color: #0E0E0E;
+            color: #ffffff;
+            padding: 25px 40px;
+            margin-bottom: 20px;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            clip-path: polygon(0% 0%, 100% 0%, 95% 50%, 100% 100%, 0% 100%);
+            transition: all 0.3s ease;
+        }
+
+        .ribbon-link:hover {
+            background-color: #2A2A2A;
+            padding-left: 60px;
+            color: #F8AF31;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-placeholder">
+            <div class="triangle tri-3"></div>
+            <div class="triangle tri-1"></div>
+            <div class="triangle tri-2"></div>
+        </div>
+        <div class="header-titles">
+            <h1>EXPERT NET</h1>
+            <h2>ESCOLHA O FORMATO</h2>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2>Selecione o serviço de impressão:</h2>
+        
+        <a href="#" class="ribbon-link">1 - FOTO 10x15</a>
+        <a href="#" class="ribbon-link">2 - FOTO 15x20</a>
+        <a href="#" class="ribbon-link">3 - FOTOS POLAROID</a>
+    </main>
+
+</body>
+</html>

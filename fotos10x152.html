@@ -9,7 +9,7 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
     <meta charset="UTF-8">
     <title>Fotos para Moldura - Otimização de Espaço</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         /* Reset básico e fontes da Index */
@@ -280,11 +280,19 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
 
     // NOVA FUNÇÃO PARA WORD
     async function gerarWord() {
+        // Verifica se a biblioteca foi carregada
+        if (typeof docx === 'undefined') {
+            alert("A biblioteca do Word ainda está carregando, aguarde um instante e tente novamente.");
+            return;
+        }
+
         const { Document, Packer, Paragraph, ImageRun } = docx;
         const children = [];
 
         for (let i = 0; i < ids.length; i++) {
             const el = document.getElementById(ids[i]);
+            if (!el.src || el.src.includes('undefined')) continue;
+
             const base64 = await canvasProcess(el, angulos[i]);
             
             if (base64) {
@@ -297,7 +305,7 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
                         new ImageRun({
                             data: buffer,
                             transformation: {
-                                width: estaGirado ? 396.8 : 283.5, // 14cm : 10cm em pontos
+                                width: estaGirado ? 396.8 : 283.5, 
                                 height: estaGirado ? 283.5 : 396.8
                             }
                         })
@@ -309,6 +317,9 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
         const doc = new Document({ sections: [{ children }] });
         Packer.toBlob(doc).then(blob => {
             saveAs(blob, "impressao_4fotos_10x14.docx");
+        }).catch(err => {
+            console.error("Erro ao gerar documento:", err);
+            alert("Erro ao gerar arquivo Word.");
         });
     }
 </script>

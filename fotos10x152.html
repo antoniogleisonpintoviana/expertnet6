@@ -279,63 +279,75 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
     }
 
     // NOVA FUNÇÃO PARA WORD
-    async function gerarWord() {
+   async function gerarWord() {
         if (typeof docx === 'undefined') {
             alert("A biblioteca não carregou.");
             return;
         }
 
         const { Document, Packer, Paragraph, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle } = docx;
+        
+        // Conversão: 1cm = 28.35 pontos
+        const cmToPt = 28.35;
+        const largura = 10 * cmToPt;
+        const altura = 14.5 * cmToPt;
+
         const rows = [];
 
-        for (let i = 0; i < ids.length; i++) {
-            const el = document.getElementById(ids[i]);
-            if (el.src && el.src.startsWith('blob:')) {
-                const base64 = await canvasProcess(el, angulos[i]);
-                const response = await fetch(base64);
-                const buffer = await response.arrayBuffer();
-                const estaGirado = (angulos[i] / 90) % 2 !== 0;
+        // Estrutura: 2 linhas (i = 0 para a primeira linha, i = 2 para a segunda)
+        for (let i = 0; i < ids.length; i += 2) {
+            const celulas = [];
+            
+            // Cria 2 colunas para cada linha
+            for (let j = i; j < i + 2; j++) {
+                const el = document.getElementById(ids[j]);
+                
+                // Verifica se a imagem existe e foi carregada
+                if (el && el.src && el.src.startsWith('blob:')) {
+                    const base64 = await canvasProcess(el, angulos[j]);
+                    const response = await fetch(base64);
+                    const buffer = await response.arrayBuffer();
+                    const estaGirado = (angulos[j] / 90) % 2 !== 0;
 
-                // Definimos o tamanho aqui (10cm = 283.5 pontos, 14.5cm = 411 pontos)
-                const w = estaGirado ? 411 : 283.5;
-                const h = estaGirado ? 283.5 : 411;
+                    const w = estaGirado ? altura : largura;
+                    const h = estaGirado ? largura : altura;
 
-                const cell = new TableCell({
-                    width: { size: 100, type: WidthType.PERCENTAGE },
-                    children: [
-                        new Paragraph({
-                            children: [
-                                new ImageRun({
-                                    data: buffer,
-                                    transformation: { width: w, height: h },
-                                    // Adicionamos estas propriedades para forçar o tamanho
-                                    type: "jpg" 
-                                })
-                            ]
-                        })
-                    ]
-                });
-
-                rows.push(new TableRow({ 
-                    children: [cell],
-                    height: { value: h, rule: 'atLeast' } // Força a altura da linha
-                }));
+                    celulas.push(new TableCell({
+                        width: { size: 50, type: WidthType.PERCENTAGE },
+                        children: [
+                            new Paragraph({
+                                children: [
+                                    new ImageRun({
+                                        data: buffer,
+                                        transformation: { width: w, height: h }
+                                    })
+                                ]
+                            })
+                        ]
+                    }));
+                } else {
+                    // Célula vazia caso não haja imagem
+                    celulas.push(new TableCell({ children: [] }));
+                }
             }
+            
+            rows.push(new TableRow({ 
+                children: celulas,
+                height: { value: altura, rule: 'atLeast' }
+            }));
         }
 
         const doc = new Document({
             sections: [{
+                properties: { page: { margin: { top: 1 * cmToPt, right: 1 * cmToPt, bottom: 1 * cmToPt, left: 1 * cmToPt } } },
                 children: [
                     new Table({
                         rows: rows,
                         width: { size: 100, type: WidthType.PERCENTAGE },
                         borders: {
-                            top: { style: BorderStyle.NONE },
-                            bottom: { style: BorderStyle.NONE },
-                            left: { style: BorderStyle.NONE },
-                            right: { style: BorderStyle.NONE },
-                            insideHorizontal: { style: BorderStyle.NONE },
-                            insideVertical: { style: BorderStyle.NONE }
+                            top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE },
+                            left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE },
+                            insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE }
                         }
                     })
                 ]
@@ -343,7 +355,7 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
         });
 
         Packer.toBlob(doc).then(blob => {
-            saveAs(blob, "impressao_final_10x14_5.docx");
+            saveAs(blob, "impressao_4fotos_10x14.docx");
         });
     }
 </script>

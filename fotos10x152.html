@@ -8,8 +8,8 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
 <head>
     <meta charset="UTF-8">
     <title>Fotos para Moldura - Otimização de Espaço</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         /* Reset básico e fontes da Index */
@@ -282,22 +282,25 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
     async function gerarWord() {
         // Verifica se a biblioteca foi carregada
         if (typeof docx === 'undefined') {
-            alert("A biblioteca do Word ainda está carregando, aguarde um instante e tente novamente.");
+            alert("A biblioteca não carregou. Verifique sua conexão.");
             return;
         }
 
+        // Na v7.8.2, a estrutura é exatamente assim:
         const { Document, Packer, Paragraph, ImageRun } = docx;
         const children = [];
 
         for (let i = 0; i < ids.length; i++) {
             const el = document.getElementById(ids[i]);
-            if (!el.src || el.src.includes('undefined')) continue;
-
-            const base64 = await canvasProcess(el, angulos[i]);
             
-            if (base64) {
+            // Só tenta processar se a imagem existir e não for o placeholder vazio
+            if (el.src && el.src.startsWith('blob:')) {
+                const base64 = await canvasProcess(el, angulos[i]);
+                
+                // Converte a base64 para ArrayBuffer
                 const response = await fetch(base64);
                 const buffer = await response.arrayBuffer();
+                
                 const estaGirado = (angulos[i] / 90) % 2 !== 0;
 
                 children.push(new Paragraph({
@@ -305,21 +308,29 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
                         new ImageRun({
                             data: buffer,
                             transformation: {
-                                width: estaGirado ? 396.8 : 283.5, 
-                                height: estaGirado ? 283.5 : 396.8
+                                width: estaGirado ? 411 : 283.5, // 14.5cm : 10cm em pontos
+                                height: estaGirado ? 283.5 : 411
                             }
                         })
                     ]
                 }));
+                // Adiciona uma quebra de parágrafo entre as fotos para não ficarem grudadas
+                children.push(new Paragraph({}));
             }
         }
 
-        const doc = new Document({ sections: [{ children }] });
+        const doc = new Document({
+            sections: [{
+                properties: {},
+                children: children
+            }]
+        });
+
         Packer.toBlob(doc).then(blob => {
             saveAs(blob, "impressao_4fotos_10x14.docx");
         }).catch(err => {
-            console.error("Erro ao gerar documento:", err);
-            alert("Erro ao gerar arquivo Word.");
+            console.error("Erro na criação do Word:", err);
+            alert("Erro ao gerar o arquivo Word.");
         });
     }
 </script>

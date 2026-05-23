@@ -1,0 +1,318 @@
+Compreendi perfeitamente. Mantenho a sua identidade visual e a estrutura do código intactas. Adicionei apenas as bibliotecas necessárias via CDN no `<head>` e o botão de "Gerar Word" na interface, criando a função `gerarWord` que utiliza essas bibliotecas para exportar o arquivo corretamente.
+
+Para que funcione quando você subir para o **GitHub Pages**, certifique-se de que o código abaixo seja o conteúdo do seu `index.html`.
+
+```html
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Fotos para Moldura - Otimização de Espaço</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        /* Reset básico e fontes da Index */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #F8AF31; /* Fundo amarelo/laranja principal da index */
+            color: #000000;
+        }
+
+        /* --- CABEÇALHO IGUAL AO INDEX --- */
+        header {
+            background-color: #B8B8B8;
+            padding: 30px 50px;
+            display: flex;
+            align-items: center;
+            border-bottom: 4px solid #F8AF31;
+            margin-bottom: 20px;
+        }
+
+        .logo-placeholder {
+            width: 120px;
+            height: 100px;
+            position: relative;
+            margin-right: 30px;
+        }
+        
+        .triangle {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 45px solid transparent;
+            border-right: 45px solid transparent;
+        }
+        .tri-1 {
+            border-bottom: 80px solid #F8AF31;
+            top: 0; left: 10px;
+            opacity: 0.8;
+        }
+        .tri-2 {
+            border-bottom: 80px solid #222;
+            top: 20px; left: 30px;
+        }
+        .tri-3 {
+            border-bottom: 80px solid #F8CE7A;
+            top: 10px; left: -10px;
+            opacity: 0.8;
+        }
+
+        .header-titles h1 {
+            font-size: 3.5rem;
+            color: #111;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .header-titles h2 {
+            font-size: 1.2rem;
+            color: #222;
+            font-weight: 600;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+        /* --- FIM DO CABEÇALHO --- */
+
+        .container {
+            max-width: 22cm;
+            margin: 0 auto;
+            padding: 0 20px 40px 20px;
+        }
+
+        .controles { 
+            margin-bottom: 15px; 
+            background: #0E0E0E; /* Cor da faixa preta da index */
+            color: #FFFFFF; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .controles h2 {
+            margin-bottom: 15px;
+            color: #F8AF31;
+        }
+
+        .controles button {
+            background-color: #F8AF31;
+            color: #0E0E0E;
+            border: none;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        .controles button:hover {
+            background-color: #F8CE7A;
+        }
+
+        .preview-container {
+            position: relative;
+            width: 21cm;
+            height: 29.7cm;
+            border: 2px solid #0E0E0E;
+            background-color: white; 
+            margin: 0 auto;
+            overflow: hidden;
+            box-shadow: 0px 10px 20px rgba(0,0,0,0.5); 
+        }
+
+        .img-preview {
+            width: 10cm;
+            height: 14cm;
+            position: absolute;
+            object-fit: cover;
+            background-color: #ddd;
+            border: 0.1mm solid #000;
+            transition: all 0.3s ease-in-out;
+            transform-origin: center center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-placeholder">
+            <div class="triangle tri-3"></div>
+            <div class="triangle tri-1"></div>
+            <div class="triangle tri-2"></div>
+        </div>
+        
+        <div class="header-titles">
+            <h1>EXPERT NET</h1>
+            <h2>SERVIÇOS DE IMPRESSÃO</h2>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="controles">
+            <h2>Otimizador de Impressão 10x14</h2>
+            <input type="file" id="inputFile" accept="image/*" multiple>
+            <br>
+            <button onclick="mostrarImagem()">Carregar Fotos</button>
+            <button onclick="gerarPDF()">Gerar PDF para Impressão</button>
+            <button onclick="gerarWord()">Gerar DOCX (Word)</button>
+            <p style="margin-top: 10px;"><small>Pressione as teclas numéricas 1, 2, 3 ou 4 para girar cada foto individualmente.</small></p>
+        </div>
+
+        <div class="preview-container">
+            <img id="img1" class="img-preview" style="top: 0.5cm; left: 0.5cm;">
+            <img id="img2" class="img-preview" style="top: 0.5cm; left: 10.6cm;">
+            <img id="img3" class="img-preview" style="top: 14.7cm; left: 0.5cm;">
+            <img id="img4" class="img-preview" style="top: 14.7cm; left: 10.6cm;">
+        </div>
+    </div>
+
+<script>
+    let angulos = [0, 0, 0, 0];
+    const ids = ["img1", "img2", "img3", "img4"];
+    const MARGEM_SUPERIOR = 0.5;
+    const MARGEM_ESQUERDA_COL1 = 0.5;
+    const MARGEM_ESQUERDA_COL2 = 10.6;
+    const ALTURA_FOTO = 14;
+    const LARGURA_FOTO = 10;
+    const ESPACAMENTO = 0.2;
+
+    document.addEventListener('keydown', (event) => {
+        const tecla = parseInt(event.key);
+        if (tecla >= 1 && tecla <= 4) {
+            girarFoto(tecla - 1);
+        }
+    });
+
+    function girarFoto(index) {
+        angulos[index] = (angulos[index] + 90) % 360;
+        atualizarLayout();
+    }
+
+    function atualizarLayout() {
+        ids.forEach((id, i) => {
+            const el = document.getElementById(id);
+            const estaGirado = (angulos[i] / 90) % 2 !== 0;
+            
+            el.style.transform = `rotate(${angulos[i]}deg)`;
+
+            let topPos;
+            let leftPos = (i === 0 || i === 2) ? MARGEM_ESQUERDA_COL1 : MARGEM_ESQUERDA_COL2;
+
+            if (i < 2) {
+                topPos = MARGEM_SUPERIOR;
+                if (estaGirado) topPos += 2; 
+            } else {
+                const indexCima = i - 2;
+                const cimaGirado = (angulos[indexCima] / 90) % 2 !== 0;
+                
+                let alturaOcupadaCima = cimaGirado ? LARGURA_FOTO : ALTURA_FOTO;
+                topPos = MARGEM_SUPERIOR + alturaOcupadaCima + ESPACAMENTO;
+
+                if (estaGirado) topPos += 2; 
+            }
+
+            el.style.top = topPos + "cm";
+            el.style.left = leftPos + "cm";
+        });
+    }
+
+    function mostrarImagem() {
+        const input = document.getElementById("inputFile");
+        const files = input.files;
+        for (let i = 0; i < ids.length; i++) {
+            if (files[i]) document.getElementById(ids[i]).src = URL.createObjectURL(files[i]);
+        }
+    }
+
+    function canvasProcess(img, angulo) {
+        return new Promise((resolve) => {
+            if (!img.src || img.src.includes('undefined')) return resolve(null);
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            const girado = (angulo / 90) % 2 !== 0;
+            const w = img.naturalWidth;
+            const h = img.naturalHeight;
+            canvas.width = girado ? h : w;
+            canvas.height = girado ? w : h;
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate((angulo * Math.PI) / 180);
+            ctx.drawImage(img, -w / 2, -h / 2);
+            resolve(canvas.toDataURL("image/jpeg", 0.8));
+        });
+    }
+
+    async function gerarPDF() {
+        const { jsPDF } = window.jspdf;
+        let pdf = new jsPDF({ unit: "cm", format: "a4" });
+
+        for (let i = 0; i < ids.length; i++) {
+            const el = document.getElementById(ids[i]);
+            const base64 = await canvasProcess(el, angulos[i]);
+            
+            if (base64) {
+                const estaGirado = (angulos[i] / 90) % 2 !== 0;
+                const col = (i === 0 || i === 2) ? MARGEM_ESQUERDA_COL1 : MARGEM_ESQUERDA_COL2;
+                
+                let row;
+                if (i < 2) {
+                    row = MARGEM_SUPERIOR;
+                } else {
+                    const cimaGirado = (angulos[i-2] / 90) % 2 !== 0;
+                    row = MARGEM_SUPERIOR + (cimaGirado ? 10 : 14) + ESPACAMENTO;
+                }
+
+                pdf.addImage(base64, "JPEG", col, row, estaGirado ? 14 : 10, estaGirado ? 10 : 14);
+            }
+        }
+        pdf.save("impressao_4fotos_10x14.pdf");
+    }
+
+    // NOVA FUNÇÃO PARA WORD
+    async function gerarWord() {
+        const { Document, Packer, Paragraph, ImageRun } = docx;
+        const children = [];
+
+        for (let i = 0; i < ids.length; i++) {
+            const el = document.getElementById(ids[i]);
+            const base64 = await canvasProcess(el, angulos[i]);
+            
+            if (base64) {
+                const response = await fetch(base64);
+                const buffer = await response.arrayBuffer();
+                const estaGirado = (angulos[i] / 90) % 2 !== 0;
+
+                children.push(new Paragraph({
+                    children: [
+                        new ImageRun({
+                            data: buffer,
+                            transformation: {
+                                width: estaGirado ? 396.8 : 283.5, // 14cm : 10cm em pontos
+                                height: estaGirado ? 283.5 : 396.8
+                            }
+                        })
+                    ]
+                }));
+            }
+        }
+
+        const doc = new Document({ sections: [{ children }] });
+        Packer.toBlob(doc).then(blob => {
+            saveAs(blob, "impressao_4fotos_10x14.docx");
+        });
+    }
+</script>
+</body>
+</html>
+
+```

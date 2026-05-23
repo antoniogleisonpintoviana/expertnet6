@@ -280,27 +280,26 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
 
     // NOVA FUNÇÃO PARA WORD
     async function gerarWord() {
-        // Verifica se a biblioteca foi carregada
         if (typeof docx === 'undefined') {
             alert("A biblioteca não carregou. Verifique sua conexão.");
             return;
         }
 
-        // Na v7.8.2, a estrutura é exatamente assim:
         const { Document, Packer, Paragraph, ImageRun } = docx;
         const children = [];
+
+        // Constantes de conversão: 1cm = 28.35 pontos
+        const cmToPt = 28.35;
+        const larguraDesejada = 10 * cmToPt;      // 283.5
+        const alturaDesejada = 14.5 * cmToPt;     // 411.075
 
         for (let i = 0; i < ids.length; i++) {
             const el = document.getElementById(ids[i]);
             
-            // Só tenta processar se a imagem existir e não for o placeholder vazio
             if (el.src && el.src.startsWith('blob:')) {
                 const base64 = await canvasProcess(el, angulos[i]);
-                
-                // Converte a base64 para ArrayBuffer
                 const response = await fetch(base64);
                 const buffer = await response.arrayBuffer();
-                
                 const estaGirado = (angulos[i] / 90) % 2 !== 0;
 
                 children.push(new Paragraph({
@@ -308,29 +307,35 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
                         new ImageRun({
                             data: buffer,
                             transformation: {
-                                width: estaGirado ? 411 : 283.5, // 14.5cm : 10cm em pontos
-                                height: estaGirado ? 283.5 : 411
+                                // Se estiver girado, inverte as dimensões
+                                width: estaGirado ? alturaDesejada : larguraDesejada,
+                                height: estaGirado ? larguraDesejada : alturaDesejada
+                            },
+                            // Isso remove a âncora fixa e permite que você arraste a foto livremente no Word
+                            floating: {
+                                wrap: { type: "none" },
+                                horizontalPosition: { offset: 0 },
+                                verticalPosition: { offset: 0 }
                             }
                         })
                     ]
                 }));
-                // Adiciona uma quebra de parágrafo entre as fotos para não ficarem grudadas
-                children.push(new Paragraph({}));
             }
         }
 
         const doc = new Document({
             sections: [{
-                properties: {},
+                properties: {
+                    page: {
+                        margin: { top: 0, right: 0, bottom: 0, left: 0 }
+                    }
+                },
                 children: children
             }]
         });
 
         Packer.toBlob(doc).then(blob => {
-            saveAs(blob, "impressao_4fotos_10x14.docx");
-        }).catch(err => {
-            console.error("Erro na criação do Word:", err);
-            alert("Erro ao gerar o arquivo Word.");
+            saveAs(blob, "impressao_4fotos_10x14_5.docx");
         });
     }
 </script>

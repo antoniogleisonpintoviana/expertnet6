@@ -288,11 +288,6 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
         const { Document, Packer, Paragraph, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle } = docx;
         const rows = [];
 
-        // Conversão de cm para pontos (1cm = 28.35pt)
-        const cmToPt = 28.35;
-        const largura = 10 * cmToPt;
-        const altura = 14.5 * cmToPt;
-
         for (let i = 0; i < ids.length; i++) {
             const el = document.getElementById(ids[i]);
             if (el.src && el.src.startsWith('blob:')) {
@@ -301,27 +296,30 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
                 const buffer = await response.arrayBuffer();
                 const estaGirado = (angulos[i] / 90) % 2 !== 0;
 
-                // Criamos uma célula de tabela que força o tamanho 10x14.5
+                // Definimos o tamanho aqui (10cm = 283.5 pontos, 14.5cm = 411 pontos)
+                const w = estaGirado ? 411 : 283.5;
+                const h = estaGirado ? 283.5 : 411;
+
                 const cell = new TableCell({
-                    width: { size: estaGirado ? altura : largura, type: WidthType.DXA },
+                    width: { size: 100, type: WidthType.PERCENTAGE },
                     children: [
                         new Paragraph({
                             children: [
                                 new ImageRun({
                                     data: buffer,
-                                    transformation: {
-                                        width: estaGirado ? altura : largura,
-                                        height: estaGirado ? largura : altura
-                                    }
+                                    transformation: { width: w, height: h },
+                                    // Adicionamos estas propriedades para forçar o tamanho
+                                    type: "jpg" 
                                 })
                             ]
                         })
                     ]
                 });
 
-                rows.push(new TableRow({ children: [cell] }));
-                // Adiciona uma linha vazia entre as fotos
-                rows.push(new TableRow({ children: [new TableCell({ children: [new Paragraph({})] })] }));
+                rows.push(new TableRow({ 
+                    children: [cell],
+                    height: { value: h, rule: 'atLeast' } // Força a altura da linha
+                }));
             }
         }
 
@@ -330,7 +328,7 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
                 children: [
                     new Table({
                         rows: rows,
-                        // Remove todas as bordas
+                        width: { size: 100, type: WidthType.PERCENTAGE },
                         borders: {
                             top: { style: BorderStyle.NONE },
                             bottom: { style: BorderStyle.NONE },
@@ -345,7 +343,7 @@ Para que funcione quando você subir para o **GitHub Pages**, certifique-se de q
         });
 
         Packer.toBlob(doc).then(blob => {
-            saveAs(blob, "impressao_4fotos_10x14_5.docx");
+            saveAs(blob, "impressao_final_10x14_5.docx");
         });
     }
 </script>
